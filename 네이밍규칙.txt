@@ -8,7 +8,7 @@ VO 변수명 단어 구분은 _(언더바)
 
 MODEL [DMI와 DTO는 VO를 상속받을거)
 DMI(Domain) select 결과용 //return 받을때 
-DTO - select, parameter 용 // DAO까지 전달용
+PARAM - select, parameter 용 // DAO까지 전달용
 VO - insert, update, delete용
 
 CRUD

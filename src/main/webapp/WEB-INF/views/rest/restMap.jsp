@@ -20,14 +20,33 @@
 		const options = { //지도를 생성할 때 필요한 기본 옵션
 			center: new kakao.maps.LatLng(35.865552, 128.593393), //지도의 중심좌표.
 			level: 5 //지도의 레벨(확대, 축소 정도)
-		};
+		}
 		
 		const map = new kakao.maps.Map(mapContainer, options); //지도 생성 및 객체 리턴
 								//여기 id값 적음
+								
+		const zoomControl = new kakao.maps.ZoomControl() //줌이벤트 등록을위한 줌컨트롤러 생성
+		map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT)
+		
 		//axios(JSON)을 이용해서 DB에서 데이터를 얻어옴
-		console.log(map.getCenter())
 		function getRestaurantList(){
-			axios.get('/restaurant/ajaxGetList').then(function(res){
+			const bounds = map.getBounds(); //현재 지도 영역을 가져옴
+			const southWest = bounds.getSouthWest() //남서쪽 끝 좌표 가져옴
+			const northEast = bounds.getNorthEast() //북동쪽 끝 좌표 가져옴
+			
+			console.log('southWest: ' + southWest)
+			console.log('northEast: ' + northEast)
+			
+			const sw_lat = southWest.getLat()
+			const sw_lng = southWest.getLng()
+			const ne_lat = northEast.getLat()
+			const ne_lng = northEast.getLng()
+			
+			axios.get('/rest/ajaxGetList',{
+				params:{
+					sw_lat, sw_lng, ne_lat, ne_lng
+				}
+			}).then(function(res){
 				console.log(res.data)
 				
 				res.data.forEach(function(item){
@@ -36,7 +55,8 @@
 			})
 		}
 		
-		getRestaurantList();
+		kakao.maps.event.addListener(map, 'dragend', getRestaurantList) //드래그할때마다 getRestaurantList호출
+		kakao.maps.event.addListener(map, 'zoom_changed', getRestaurantList) //확대,축소 할때마다 getRestaurantList호출
 	
 		//마커를 생성함 (커스텀 오버레이 사용)
 		function createMarker(item){
@@ -80,7 +100,7 @@
 		
 		function moveToDetail(i_rest){
 			console.log(i_rest)
-			location.href='/restaurant/restDetail?i_rest='+i_rest
+			location.href='/rest/restDetail?i_rest='+i_rest
 		}
 		
 		function addEvent(target, type, callback){

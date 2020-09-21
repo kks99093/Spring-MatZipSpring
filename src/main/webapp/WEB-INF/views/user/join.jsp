@@ -23,19 +23,14 @@
 	//ㅡㅡㅡㅡ 아이디 중복 체크 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 		function chkId(){
 			const user_id = frm.user_id.value
-			axios.get('/user/ajaxChk',{
-				params: {
-					'user_id' : user_id
-					//post는 { 'user_id' : user_id} 만적어줘도됨, get일때만 params씀
-				}
+			axios.post('/user/ajaxChk',{
+					user_id //post는 params:{}지움, get은 params:{} 적음
 			}).then(function(res){
 				console.log(res)
-				if(res.data.result == 2){ //아이디 없음
+				if(res.data == '2'){ //아이디 없음
 					idChkResult.innerText = '사용할 수 있는 아이디 입니다'
-					frm.user_idchk.setAttribute('value', 2)
-				}else if(res.data.result == 3){ //아이디 중복됨
+				}else if(res.data == '3'){ //아이디 중복됨		
 					idChkResult.innerText = '이미 사용중입니다'
-					frm.user_idchk.setAttribute('value', 3)
 				}
 			})
 		}

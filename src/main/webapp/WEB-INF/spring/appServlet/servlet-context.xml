@@ -11,6 +11,9 @@
 
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
+	<context:property-placeholder location="classpath:config.properties"/>
+	<!-- classpath:는 resources 아래라는뜻, 다른쪽에 갖다놓고싶으면 /WEB-INF/Views/config.properties 이런식으로 적어주면됨 -->
+	
 	<!-- Enables the Spring MVC @Controller programming model -->
 	<!-- class위에 @를 적는건 99% bean등록 -->
 	<annotation-driven />
@@ -34,13 +37,15 @@
 	<beans:bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 	    <beans:property name="poolName" value="springHikariCP" />
 	    <beans:property name="connectionTestQuery" value="SELECT 1 FROM DUAL" />
-	    <beans:property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+	    <beans:property name="driverClassName" value="${db.driver}" />
 	    <beans:property name="maximumPoolSize" value="10" />
 	    <beans:property name="idleTimeout" value="5000" />
 	    
-	    <beans:property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/matzip?characterEncoding=UTF-8"/>
-		<beans:property name="username" value="root"/>
-		<beans:property name="password" value="koreait2020"/> 
+	    <beans:property name="jdbcUrl" value="${db.url}"/>
+		<beans:property name="username" value="${db.username}"/>
+		<beans:property name="password" value="${db.password}"/>
+		<!-- src/main/resources에 config.properties를 만들어서 db.%!@%로 설정해놓고 여기서 참조해서 씀 (${db.%!@%})-->
+		<!-- <context:property-placeholder location="classpath:config.properties"/> 위에 이거적어줘야함 -->
 	</beans:bean>
 	
 	<beans:bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">

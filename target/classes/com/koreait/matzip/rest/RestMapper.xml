@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.koreait.matzip.rest.RestMapper">
+	<!-- 내가 보고있는 화면범위에서 Restaurant 셀렉트 -->
+	<select id="selRestList" parameterType="restPARAM" resultType="restDMI">
+					<!-- 타입에 class명만 적을거면 mybatis-alias에서 alias등록을 해줘야함 -->
+		SELECT i_rest, nm, lat, lng
+		FROM t_restaurant 
+		WHERE lat BETWEEN #{sw_lat} AND #{ne_lat}
+		AND lng BETWEEN #{sw_lng} AND #{ne_lng}
+	</select>
+	
+	<insert id="insReg" parameterType="restPARAM">
+		INSERT INTO t_restaurant
+		(nm, addr, lat, lng, cd_category, i_user)
+		VALUES
+		(#{nm}, #{addr},#{lat}, #{lng}, #{cd_category}, #{i_user})
+	</insert>
+</mapper>
