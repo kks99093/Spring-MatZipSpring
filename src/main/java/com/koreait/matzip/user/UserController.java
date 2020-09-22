@@ -31,6 +31,8 @@ public class UserController {
 	//bean등록 - 클래스위에 @적힌애,SpringContainer가 관리하는애
 	//Autowired는 여기에 넣을수있는애가 1개만있어야함 여러개라면 에러터짐(어떤걸 넣어야할지 모르니)
 	
+	
+
 //로그인ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 	@RequestMapping(value="/login", method = RequestMethod.GET)
 	public String login(Model model) { //화면(jsp파일)한테 뭔가 보내줘야할때는 model을 적어줘야함
@@ -68,6 +70,12 @@ public class UserController {
 		return "redirect:/user/login";
 	}
 	
+//로그아웃 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	@RequestMapping(value="/logout", method = RequestMethod.GET)
+	public String logout(HttpSession hs) {
+		hs.invalidate();
+		return "redirect:/";
+	}
 	
 //회원가입ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 	@RequestMapping(value="/join", method = RequestMethod.GET)

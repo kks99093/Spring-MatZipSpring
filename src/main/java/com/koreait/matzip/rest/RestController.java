@@ -1,6 +1,8 @@
 package com.koreait.matzip.rest;
 
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.koreait.matzip.Const;
+import com.koreait.matzip.SecurityUtils;
 import com.koreait.matzip.ViewRef;
+import com.koreait.matzip.rest.model.RestDMI;
 import com.koreait.matzip.rest.model.RestPARAM;
 import com.koreait.matzip.user.model.UserVO;
 
@@ -30,17 +34,19 @@ public class RestController {
 	}
 	
 	//화면에 보이는영역에 있는 restaurant 정보 가져오기
-	@RequestMapping("/ajaxGetList")
-	@ResponseBody  public String ajaxGetList(RestPARAM param) {
+	@RequestMapping(value = "/ajaxGetList", produces = "application/json; charset=utf8")//ResponsBody 인코딩설정을 해줘야함
+	@ResponseBody  public List<RestDMI> ajaxGetList(RestPARAM param) {
 	//이렇게 @ResponseBody 뒤에 바로적어도됨
-		
 		return service.selRestList(param);
-		
+		//그냥 객체를 보내면 스프링이 알아서 JSON형태로 바꿔서 리턴을 해준다
+		//4.대 스프링은 jackson을 기본 라이브러리로 다운받아 주기때문에 라이브러리도 따로 받을필요 없다
 	}
+	
 	//restaurant 등록
 	
 	@RequestMapping(value="/reg", method = RequestMethod.GET)
 	public String restReg(Model model) {
+		model.addAttribute("categoryList",service.selCategoryList());
 		model.addAttribute(Const.TITLE,"가게 등록");
 		model.addAttribute(Const.VIEW,"rest/restReg");
 		return ViewRef.TEMP_MENU;
@@ -48,11 +54,23 @@ public class RestController {
 	
 	@RequestMapping(value="/reg", method = RequestMethod.POST)
 	public String insReg(RestPARAM param, HttpSession hs) {
-		UserVO vo = (UserVO)hs.getAttribute(Const.LOGIN_USER);
-		param.setI_user(vo.getI_user());
-		service.insReg(param);
-		return"redirect:/rest/map";
+		param.setI_user(SecurityUtils.getLoginUserPk(hs));
+		int result = service.insRest(param);
+		if(result != 1) { //insert 실패시
+			return "redirect:/rest/reg";
+		}
+		return "redirect:/rest/map";
 	}
 	
+	//restaurant 디테일 가기
+	@RequestMapping("/detail")
+	public String detail(Model model,RestPARAM param){
+		
+		RestDMI data = service.selRest(param);
+		model.addAttribute("data", data);
+		model.addAttribute(Const.TITLE,data.getNm());//가게명
+		model.addAttribute(Const.VIEW,"rest/restDetail");
+	return ViewRef.TEMP_MENU;
+	}
 	
 }

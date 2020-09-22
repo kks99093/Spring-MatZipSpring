@@ -64,4 +64,14 @@
 	<mybatis-spring:scan base-package="com.koreait.matzip"/>
 	<!-- 마이바티스는 DAO를 bean등록함 -->
 	
+	
+	<!-- 로그인 유무 체크할때 쓰는 인터셉터 -->
+	<interceptors>
+		<interceptor>
+		<!-- **해줘야함 -->
+			<mapping path="/**"/>
+			<beans:bean class="com.koreait.matzip.LoginCheckInterceptor"/>
+		</interceptor>
+	</interceptors>	
+	
 </beans:beans>

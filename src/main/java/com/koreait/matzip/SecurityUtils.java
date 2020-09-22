@@ -19,11 +19,15 @@ public class SecurityUtils {
 		return getLoginUser(request).getI_user();
 	}
 	
+	public static int getLoginUserPk(HttpSession hs) {
+		return ((UserVO)hs.getAttribute(Const.LOGIN_USER)).getI_user();
+	}
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ로그인 판단ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 	
 	public static UserVO getLoginUser(HttpServletRequest request) {
 		HttpSession hs = request.getSession();
 		return (UserVO) hs.getAttribute(Const.LOGIN_USER);
+		//UserVO가 UserPARAM의 부모이기떄문에 UserVO로 받아도 괜춘
 	}
 
 	public static boolean isLogout(HttpServletRequest request) {

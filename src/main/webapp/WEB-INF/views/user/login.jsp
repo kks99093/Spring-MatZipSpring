@@ -9,9 +9,9 @@
 				<div><input type="password" name="user_pw" placeholder="비밀번호" value="ddddd"></div>
 				<div class="msg">${data.msg}</div>
 				<div><input type="submit" id="login_submit" value=""></div>
-				<a href="/user/join">회원가입</a>
+				<div><a href="/user/join">회원가입</a></div>
+				<div><a href="/rest/map">맵으로</a></div>
 			</form>			
 		<div id="login_bg"></div>
 	</div>
 </div>
-	

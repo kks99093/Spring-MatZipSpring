@@ -13,14 +13,12 @@
 			<input type="hidden" name="lng" value="0">
 			<div>
 				카테고리 : 
-				<input type="text" name="cd_category">
-<%-- 				<select name="cd_category">
+ 				<select name="cd_category">
 					<option value="0">---선택---</option>
 					<c:forEach items="${categoryList}" var="item">
 						<option value="${item.cd}">${item.val}</option>
 					</c:forEach>
 				</select>
---%>
 			</div>
 			<div><input type="submit" value="등록"></div>
 		</form>
