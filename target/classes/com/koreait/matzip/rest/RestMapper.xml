@@ -10,6 +10,7 @@
 		AND lng BETWEEN #{sw_lng} AND #{ne_lng}
 	</select>
 	
+	<!-- 레스토랑 인설트 -->
 	<insert id="insRest" parameterType="RestPARAM">
 		INSERT INTO t_restaurant
 		(nm, addr, lat, lng, cd_category, i_user)
@@ -17,6 +18,7 @@
 		(#{nm}, #{addr},#{lat}, #{lng}, #{cd_category}, #{i_user})
 	</insert>
 	
+	<!-- 디테일 셀렉트 -->
 	<select id="selRest" parameterType="restPARAM" resultType="restDMI">
 		SELECT 
 			A.i_rest, A.nm, A.lat, A.lng, A.addr, A.i_user, A.hits
@@ -37,4 +39,34 @@
 		ON A.i_rest = D.i_rest
 		WHERE A.i_rest = #{i_rest}
 	</select>
+	
+	<!-- 레스토랑 딜리트 -->
+	<!-- foreginKey가 갈려있기때문에 참조되어있는애를 다 삭제해야함 -->
+	<!-- 트렌잭션 여러작업을 하나로 묶는다 (추천메뉴,메뉴,레스토랑 다삭제해야하기때문에 트렌잭션을 검),
+	트랜잭션은 하나하나 지우다가(추천메뉴->메뉴->레스토랑순서로) 실패하면 다시 롤백함-->
+	<!--추천메뉴 삭제-->
+	<delete id="delRestRecMenu" parameterType="restPARAM">
+		DELETE A FROM t_restaurant_recommend_menu A
+		INNER JOIN t_restaurant B
+		ON A.i_rest = B.i_rest
+		WHERE B.i_rest = #{i_rest}
+		AND B.i_user = #{i_user}
+	</delete>
+	
+	<!-- 메뉴 삭제 -->
+	<delete id="delRestMenu" parameterType="restPARAM">
+		DELETE A FROM t_restaurant_menu A
+		INNER JOIN t_restaurant B
+		ON A.i_rest = B.i_rest
+		WHERE B.i_rest = #{i_rest}
+		AND B.i_user = #{i_user}
+	</delete>
+	
+	<delete id="delRest" parameterType="restPARAM">
+		DELETE FROM t_restaurant
+		WHERE i_rest = #{i_rest} 
+		AND i_user = #{i_user}
+	</delete>
+	
+	
 </mapper>

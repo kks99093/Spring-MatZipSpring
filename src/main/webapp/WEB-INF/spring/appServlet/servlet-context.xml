@@ -4,10 +4,12 @@
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
@@ -64,6 +66,12 @@
 	<mybatis-spring:scan base-package="com.koreait.matzip"/>
 	<!-- 마이바티스는 DAO를 bean등록함 -->
 	
+	<!-- 트랜잭션 사용 Namespaces에서 tx 추가(tx:annotation-driven을 쓰기때문) -->
+	<beans:bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<beans:property name="dataSource" ref="dataSource"/>
+	<!-- 오토커밋을 끊다음에 에러가 터진다면 백업위치로 돌아가고 안터지면 커밋을 날린다(라는 것을 @Transactional이 적힌곳에 넣어준다) -->
+	</beans:bean>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
 	
 	<!-- 로그인 유무 체크할때 쓰는 인터셉터 -->
 	<interceptors>

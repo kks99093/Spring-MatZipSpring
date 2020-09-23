@@ -59,7 +59,7 @@ public class RestController {
 		if(result != 1) { //insert 실패시
 			return "redirect:/rest/reg";
 		}
-		return "redirect:/rest/map";
+		return "redirect:/";
 	}
 	
 	//restaurant 디테일 가기
@@ -71,6 +71,21 @@ public class RestController {
 		model.addAttribute(Const.TITLE,data.getNm());//가게명
 		model.addAttribute(Const.VIEW,"rest/restDetail");
 	return ViewRef.TEMP_MENU;
+	}
+	//restaurant 삭제
+	@RequestMapping("/del")
+	public String delRest(Model model, RestPARAM param, HttpSession hs){
+		param.setI_user(SecurityUtils.getLoginUserPk(hs));
+		int result = 1;
+		//@Transactional은 이미 try-cahtch를 쓰고있기떄문에(선생님예상) 서비스에서가 아닌 여기서 try-cahtch를 걸어준다
+		//try-catch를 안하면 에러가터졌을때 우리가 적은 쿼리문이 찍힌다(해킹당하기 좋은상태), 그렇기떄문에 try-catch해줌
+		try {
+			service.delRestTran(param);
+		} catch (Exception e) {
+			result = 0;
+		}
+		
+		return "redirect:/";
 	}
 	
 }
