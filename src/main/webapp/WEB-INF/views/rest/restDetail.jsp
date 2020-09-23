@@ -4,11 +4,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <div class="recMenuContainer">
-	<c:forEach items="${recommendMenuList}" var="item">
+	<c:forEach items="${recMenuList}" var="item">
 		<div class="recMenuItem" id="recMenuItem_${item.seq}">
 			<div class="pic">
 				<c:if test="${item.menu_pic != null && item.menu_pic !='' }">
-					<img src="/res/img/restaurant/${data.i_rest}/${item.menu_pic}">
+					<img src="/res/img/rest/${data.i_rest}/rec_menu/${item.menu_pic}">
 				</c:if>
 			</div>
 			<div class="info">
@@ -16,7 +16,7 @@
 				<div class="price"><fmt:formatNumber type="number" value="${item.menu_price}"/></div>						
 			</div>
 			<c:if test="${loginUser.i_user == data.i_user}">
-				<div class="delIconContainer" onclick="delRecMenu(${data.i_rest}, ${item.seq})">
+				<div class="delIconContainer" onclick="delRecMenu(${item.seq})">
 					<span class="material-icons">clear</span>
 				</div>							
 			</c:if>
@@ -30,7 +30,7 @@
 			<h2>- 추천 메뉴 -</h2>
 			<div>
 				<div><button type="button" onclick="addRecMenu()">추천 메뉴 추가</button></div>
-				<form id="recFrm" action="/restaurant/addRecMenusProc" enctype="multipart/form-data" method="post">					
+				<form id="recFrm" action="/rest/recMenus" enctype="multipart/form-data" method="post">					
 					<input type="hidden" name="i_rest" value="${data.i_rest}">
 					<div id="recItem">
 					</div>
@@ -39,7 +39,7 @@
 			</div>
 			<h2>- 메뉴 -</h2>
 			<div>
-				<form id=menuFrm" action="/restaurant/addMenuProc" enctype="multipart/form-data" method="post">
+				<form id=menuFrm" action="/rest/addMenu" enctype="multipart/form-data" method="post">
 					<input type="hidden" name="i_rest" value="${data.i_rest}">
 					<input type="file" name="menu_pic" multiple>
 					<div id="menuItem"></div>
@@ -102,13 +102,14 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-	function delRecMenu(i_rest, seq){
-		console.log('i_rest : ' + i_rest)
+	function delRecMenu(seq){
+		console.log('i_rest : ' + ${data.i_rest})
 		console.log('seq : ' + seq)
 		
-		axios.get('/restaurant/ajaxDelRecMenu',{
+		axios.get('/rest/ajaxDelRecMenu',{
 			params: {
-				i_rest, seq
+				i_rest: ${data.i_rest},
+				seq: seq
 			}
 		}).then(function(res){
 			if(res.data == 1){
@@ -132,7 +133,7 @@
 		inputPrice.setAttribute('name', 'menu_price')
 		var inputPic = document.createElement('input')
 		inputPic.setAttribute('type','file')
-		inputPic.setAttribute('name', 'menu_pic_' + idx++)
+		inputPic.setAttribute('name', 'menu_pic')
 		
 		div.append('메뉴 : ') //문자열은 append만 됨
 		div.append(inputNm) //이때는 appendchild도 가능

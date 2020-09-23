@@ -18,6 +18,16 @@
 		(#{nm}, #{addr},#{lat}, #{lng}, #{cd_category}, #{i_user})
 	</insert>
 	
+	<!-- 레스토랑 추천 메뉴 인설트 -->
+	<insert id="insRestRegMenu" parameterType="RestRecMenuVO">
+		INSERT INTO t_restaurant_recommend_menu
+		(i_rest, seq, menu_nm, menu_price, menu_pic)
+		SELECT 
+		#{i_rest}, ifnull(max(seq), 0)+1, #{menu_nm}, #{menu_price}, #{menu_pic}
+		FROM t_restaurant_recommend_menu
+		WHERE i_rest = #{i_rest}
+	</insert>
+	
 	<!-- 디테일 셀렉트 -->
 	<select id="selRest" parameterType="restPARAM" resultType="restDMI">
 		SELECT 
@@ -40,6 +50,24 @@
 		WHERE A.i_rest = #{i_rest}
 	</select>
 	
+	<!-- 추천메뉴 셀렉트 -->
+	<select id="selRestRecMenus" parameterType="RestPARAM" resultType="RestRecMenuVO">
+		SELECT A.seq, A.menu_nm, A.menu_price, A.menu_pic
+		FROM t_restaurant_recommend_menu A
+		<if test="i_user >0">
+			INNER JOIN t_restaurant B
+			ON A.i_rest = B.i_rest
+			AND B.i_user = #{i_user}
+		</if>
+		WHERE i_rest = #{i_rest}
+		<if test="seq > 0">
+			AND A.seq = #{seq}
+		</if>
+		<!-- 리스트를 불러올때는 i_user, seq 둘다 0임, 삭제하기위해 정보를 얻어올때는 저거 두개가 1이상이됨 -->
+		<!-- 만약 내가 쓴글이 아닌데 삭제할 정보를 얻으려고 요청하면 0개의 글이 넘어옴 -->
+	</select>
+	
+	
 	<!-- 레스토랑 딜리트 -->
 	<!-- foreginKey가 갈려있기때문에 참조되어있는애를 다 삭제해야함 -->
 	<!-- 트렌잭션 여러작업을 하나로 묶는다 (추천메뉴,메뉴,레스토랑 다삭제해야하기때문에 트렌잭션을 검),
@@ -51,6 +79,9 @@
 		ON A.i_rest = B.i_rest
 		WHERE B.i_rest = #{i_rest}
 		AND B.i_user = #{i_user}
+		<if test="seq > 0">
+			AND A.seq = #{seq}
+		</if>
 	</delete>
 	
 	<!-- 메뉴 삭제 -->
@@ -60,8 +91,12 @@
 		ON A.i_rest = B.i_rest
 		WHERE B.i_rest = #{i_rest}
 		AND B.i_user = #{i_user}
+		<if test="seq > 0">
+			AND A.seq = #{seq}
+		</if>
 	</delete>
 	
+	<!-- 레스토랑 삭제 -->
 	<delete id="delRest" parameterType="restPARAM">
 		DELETE FROM t_restaurant
 		WHERE i_rest = #{i_rest} 

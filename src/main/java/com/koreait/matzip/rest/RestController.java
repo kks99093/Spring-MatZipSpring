@@ -11,13 +11,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.koreait.matzip.Const;
 import com.koreait.matzip.SecurityUtils;
 import com.koreait.matzip.ViewRef;
 import com.koreait.matzip.rest.model.RestDMI;
 import com.koreait.matzip.rest.model.RestPARAM;
-import com.koreait.matzip.user.model.UserVO;
 
 @Controller //Controller박으면 handdlerMapper가 주시하는애라는 뜻
 @RequestMapping("/rest")
@@ -65,8 +66,10 @@ public class RestController {
 	//restaurant 디테일 가기
 	@RequestMapping("/detail")
 	public String detail(Model model,RestPARAM param){
-		
 		RestDMI data = service.selRest(param);
+		
+		model.addAttribute("css",new String[] {"restaurant"});
+		model.addAttribute("recMenuList", service.selResMenus(param));
 		model.addAttribute("data", data);
 		model.addAttribute(Const.TITLE,data.getNm());//가게명
 		model.addAttribute(Const.VIEW,"rest/restDetail");
@@ -86,6 +89,27 @@ public class RestController {
 		}
 		
 		return "redirect:/";
+	}
+	
+	//추천메뉴 등록(파일 업로드)
+	@RequestMapping(value="/recMenus", method=RequestMethod.POST)
+	//메소드가 한개라면 POST,GET안적어줘도 알아서 넘어오게 해주는듯?, 메소드가 2개라면 method 해줘야하는듯?
+	public String recMenus(MultipartHttpServletRequest mReq, RedirectAttributes rs) {		
+		
+		int i_rest = service.insResMenus(mReq);
+		
+		//addAttribute는 쿼리스트링 만드는것, addFlashAttribute는 쿼리스트링을 안만들고 세션을 사용해서 값을전달하고 사용후 바로 삭제
+		rs.addAttribute("i_rest", i_rest);
+		return "redirect:/rest/detail";
+	}
+	//추천메뉴 삭제
+	@RequestMapping(value="/ajaxDelRecMenu", method=RequestMethod.GET)
+	@ResponseBody public int ajaxDelRecMenu(RestPARAM param, HttpSession hs) {
+		
+		String path = "/resources/img/rest" + param.getI_rest() + "/rec_menu/";
+		String realpath = hs.getServletContext().getRealPath(path);
+		param.setI_user(SecurityUtils.getLoginUserPk(hs)); //로긴 유저 pk 담기
+		return service.delRecMenu(param, path);
 	}
 	
 }
