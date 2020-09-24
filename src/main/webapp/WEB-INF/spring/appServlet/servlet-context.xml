@@ -80,6 +80,12 @@
 			<mapping path="/**"/>
 			<beans:bean class="com.koreait.matzip.LoginCheckInterceptor"/>
 		</interceptor>
+		
+		<!-- rest로 들어갈때 추가로 인터셉터(장난질을 막기위함) -->
+		<interceptor>
+			<mapping path="/rest/*"/>
+			<beans:bean class="com.koreait.matzip.RestInterceptor"/>
+		</interceptor>
 	</interceptors>	
 	
 	<!-- 파일 업로드 -->

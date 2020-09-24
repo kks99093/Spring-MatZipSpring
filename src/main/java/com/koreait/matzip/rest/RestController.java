@@ -8,15 +8,18 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.koreait.matzip.Const;
 import com.koreait.matzip.SecurityUtils;
 import com.koreait.matzip.ViewRef;
+import com.koreait.matzip.model.RestFile;
 import com.koreait.matzip.rest.model.RestDMI;
 import com.koreait.matzip.rest.model.RestPARAM;
 
@@ -66,10 +69,12 @@ public class RestController {
 	//restaurant 디테일 가기
 	@RequestMapping("/detail")
 	public String detail(Model model,RestPARAM param){
-		RestDMI data = service.selRest(param);
+		int hitsresult = service.updHits(param);//조회수
 		
+		RestDMI data = service.selRest(param);
 		model.addAttribute("css",new String[] {"restaurant"});
 		model.addAttribute("recMenuList", service.selResMenus(param));
+		model.addAttribute("menuList",service.selMenus(param));
 		model.addAttribute("data", data);
 		model.addAttribute(Const.TITLE,data.getNm());//가게명
 		model.addAttribute(Const.VIEW,"rest/restDetail");
@@ -106,10 +111,25 @@ public class RestController {
 	@RequestMapping(value="/ajaxDelRecMenu", method=RequestMethod.GET)
 	@ResponseBody public int ajaxDelRecMenu(RestPARAM param, HttpSession hs) {
 		
-		String path = "/resources/img/rest" + param.getI_rest() + "/rec_menu/";
-		String realpath = hs.getServletContext().getRealPath(path);
+		
 		param.setI_user(SecurityUtils.getLoginUserPk(hs)); //로긴 유저 pk 담기
-		return service.delRecMenu(param, path);
+		return service.delRecMenu(param, hs);
+	}
+	
+	//메뉴 등록(multiple 파일 업로드)
+	@RequestMapping("/menus")
+	public String menus( RestFile param 
+			//ModelAttribute는 파라미터를 객체로 받을때  써줘야함, restPARAM도 원래는 써줘야함 그런데 Spring이 알아서 해주는듯?
+			//안적어줘도됨	 
+			, HttpSession hs
+			, RedirectAttributes ra) {
+						//다중 객체를 받을때 사용하는거(model 패키지에 RestFile 클래스 만들어놓음)
+//		for(MultipartFile file : param.getMenu_pic()) {
+//			System.out.println("fileNm : " + file.getOriginalFilename());
+//		}
+		int i_user = SecurityUtils.getLoginUserPk(hs);
+		int result = service.insMenus(param, i_user);
+		return"redirect:/rest/detail?i_rest=" + param.getI_rest();
 	}
 	
 }

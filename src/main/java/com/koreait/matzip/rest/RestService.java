@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,9 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.koreait.matzip.CommonUtils;
+import com.koreait.matzip.Const;
 import com.koreait.matzip.FileUtils;
+import com.koreait.matzip.SecurityUtils;
 import com.koreait.matzip.model.CodeVO;
 import com.koreait.matzip.model.CommonMapper;
+import com.koreait.matzip.model.RestFile;
 import com.koreait.matzip.rest.model.RestDMI;
 import com.koreait.matzip.rest.model.RestPARAM;
 import com.koreait.matzip.rest.model.RestRecMenuVO;
@@ -46,6 +51,11 @@ public class RestService {
 		return cMapper.selCodeList(p);
 	}
 	
+	//조회수 올리기
+	public int updHits(RestPARAM param) {		
+		return mapper.updHits(param);
+	}
+	
 	// 디테일 셀렉트
 	public RestDMI selRest(RestPARAM param) {
 		return mapper.selRest(param);
@@ -53,6 +63,10 @@ public class RestService {
 	// 추천메뉴 셀렉트
 	public List<RestRecMenuVO> selResMenus(RestPARAM param) {
 		return mapper.selRestRecMenus(param);
+	}
+	//메뉴 셀렉트
+	public List<RestRecMenuVO> selMenus(RestPARAM param){
+		return mapper.selRestMenus(param);
 	}
 	
 	//트랜잭션으로 레스토랑 삭제
@@ -74,13 +88,19 @@ public class RestService {
 	
 	//추천메뉴 등록(업로드)
 	public int insResMenus(MultipartHttpServletRequest mReq) {
-		
+		int i_user = SecurityUtils.getLoginUserPk(mReq.getSession());
 		int i_rest = Integer.parseInt(mReq.getParameter("i_rest"));
+		
+		if(_authFail(i_rest,i_user)) { //인증실패 유무, true라면 인증실패
+			return Const.FAIL; //인증 실패했다면 바로 0을 리턴
+		}
+		
+		
 		List<MultipartFile> fileList = mReq.getFiles("menu_pic"); //이미지파일을 담는 List(배열생성) 
 		String[] menuNmArr = mReq.getParameterValues("menu_nm"); //메뉴이름을 담는 String배열
 		String[] menuPriceArr = mReq.getParameterValues("menu_price"); //가격을 담는 String 배열
 		
-		String path = mReq.getServletContext().getRealPath("/resources/img/rest/" + i_rest + "/rec_menu/");
+		String path = Const.realPath + "/resources/img/rest/" + i_rest + "/rec_menu/";
 		//저장위치 얻어오기(드라이브~프로젝트작업공간까지의 절대주소), pome.xml에서 서블릿,jsp를 최신버전으로 바꿔줘야함
 		System.out.println(path);
 		List<RestRecMenuVO> list = new ArrayList();
@@ -120,14 +140,17 @@ public class RestService {
 	
 	
 	//ajax 추천메뉴 삭제
-	public int delRecMenu(RestPARAM param, String realPath) {
+	public int delRecMenu(RestPARAM param,  HttpSession hs) {
 		//실제 파일 삭제
 		List<RestRecMenuVO> list = mapper.selRestRecMenus(param); //이미지파일 이름을 가져오기위해 추천메뉴를 셀렉해서옴
+		String path = Const.realPath + "/resources/img/rest/" + param.getI_rest() + "/rec_menu/";
+		
 		if(list.size() == 1) {
 			RestRecMenuVO item =list.get(0); //무조건 배열로 넘어오기때문에 이런식으로 객체를 얻어야함
 			
 			if(item.getMenu_pic() != null && !item.getMenu_pic().equals("")) {//이미지가 있다면 삭제
-				File file = new File(realPath + item.getMenu_pic());
+				File file = new File(path + item.getMenu_pic());
+				System.out.println(path + item.getMenu_pic());
 				if(file.exists()) { //파일이 존재하는지(존재한다면 true)
 					if(file.delete()) {//file.delete()도 결과값이 boolean으로 성공여부가 날아옴 그걸 이용해서 기록남기면됨
 						return mapper.delRestRecMenu(param);
@@ -140,5 +163,46 @@ public class RestService {
 		}
 		
 		return mapper.delRestRecMenu(param);
+	}
+
+	
+	//메뉴 등록
+	public int insMenus(RestFile param, int i_user) {
+		
+		if(_authFail(param.getI_rest(),i_user)) { //인증실패 유무, true라면 인증실패
+			return Const.FAIL; //인증 실패했다면 바로 0을 리턴
+		}
+		
+		String path = Const.realPath + "/resources/img/rest/" + param.getI_rest() + "/menu/";
+		
+		List<RestRecMenuVO> list = new ArrayList();
+		
+		for(MultipartFile mf : param.getMenu_pic()) {
+			RestRecMenuVO vo = new RestRecMenuVO();
+			list.add(vo);
+			
+			//null이 박혀있으면 파일이 없다는것, 문자열이 박혀있다면 파일이 있다는것
+			String saveFileNm = FileUtils.saveFile(path, mf); //UUID로 파일명을 만들면서 디렉터리에 파일생성까지 해주는 메소드를 만듬
+			vo.setMenu_pic(saveFileNm);
+			vo.setI_rest(param.getI_rest());
+		
+		}
+		
+		for(RestRecMenuVO vo : list) {
+			mapper.insMenus(vo);
+		}
+		return Const.SUCCESS;
+	}
+	
+	//글쓴이인증 셀렉트 - 장난질 막음, i_user를 같이 보내서 sel했는데 검색이 안된다면 장난질이라는거
+	private boolean _authFail(int i_rest, int i_user) { //private는 _로 시작
+		RestPARAM param = new RestPARAM();
+		param.setI_rest(i_rest);
+		
+		RestDMI dbResult = mapper.selRest(param);
+		if(dbResult == null || dbResult.getI_user() != i_user) {
+			return true;
+		}
+		return false;
 	}
 }

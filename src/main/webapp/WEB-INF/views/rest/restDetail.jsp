@@ -39,7 +39,7 @@
 			</div>
 			<h2>- 메뉴 -</h2>
 			<div>
-				<form id=menuFrm" action="/rest/addMenu" enctype="multipart/form-data" method="post">
+				<form id=menuFrm" action="/rest/menus" enctype="multipart/form-data" method="post">
 					<input type="hidden" name="i_rest" value="${data.i_rest}">
 					<input type="file" name="menu_pic" multiple>
 					<div id="menuItem"></div>
@@ -81,8 +81,15 @@
 										<c:if test="${fn:length(menuList) > 0}">
 											<c:forEach var="i" begin="0" end="${fn:length(menuList) > 3 ? 2 : fn:length(menuList) - 1}">
 												<div class="menuItem">
-													<img src="/res/img/restaurant/${data.i_rest}/menu/${menuList[i].menu_pic}">
-												</div>
+													<div>
+														<img src="/res/img/rest/${data.i_rest}/menu/${menuList[i].menu_pic}">
+													</div>	
+												<c:if test="${loginUser.i_user == data.i_user}">
+													<div class="delIconContainer">
+														<span class="material-icons">clear</span>
+													</div>
+												</c:if>																	
+												</div>																
 											</c:forEach>
 										</c:if>
 										<c:if test="${fn:length(menuList) > 3}">
@@ -124,16 +131,25 @@
 	var idx = 0;
 	function addRecMenu(){
 		var div = document.createElement('div')
+		div.setAttribute('id', 'recMenu_' + idx++)
 		
-		var inputNm = document.createElement('input')
+		var inputNm = document.createElement('input') //menu_nm 인풋 만드는부분
 		inputNm.setAttribute('type','text')
 		inputNm.setAttribute('name', 'menu_nm')
-		var inputPrice = document.createElement('input')
+		var inputPrice = document.createElement('input') //menu_price 인풋 만드는 부분
 		inputPrice.setAttribute('type','number')
 		inputPrice.setAttribute('name', 'menu_price')
-		var inputPic = document.createElement('input')
+		inputPrice.value= '0'
+		var inputPic = document.createElement('input') //menu_pic 인풋 만드는 부분
 		inputPic.setAttribute('type','file')
 		inputPic.setAttribute('name', 'menu_pic')
+		var delBtn = document.createElement('input') //삭제버튼 인풋 만드는 부분
+		delBtn.setAttribute('type', 'button')
+		delBtn.setAttribute('value', 'X')
+				
+		delBtn.addEventListener('click', function(){
+			div.remove()
+		})
 		
 		div.append('메뉴 : ') //문자열은 append만 됨
 		div.append(inputNm) //이때는 appendchild도 가능
@@ -141,6 +157,7 @@
 		div.append(inputPrice)
 		div.append(' 사진 : ')
 		div.append(inputPic)
+		div.append(delBtn)
 		
 		recItem.append(div)
 	}

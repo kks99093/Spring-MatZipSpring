@@ -23,16 +23,13 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter{
 		HttpServletResponse response, Object handler) throws Exception{
 		String uri = request.getRequestURI(); //주소값을 받아옴
 		String[] uriArr = uri.split("/");
-			
-		if(uriArr[1].equals("res")) { //css,js,img같은것들은 그냥 통과시킴
+
+		
+		if(uri.equals("/")) { // /(인덱스)로 들어올경우는 바로 통과시킴
 			return true;
-		} else if(uriArr.length < 3) { //주소가 이상한 경우
-			return false; //에러페이지로 이동 넣어줄거
-		}
-		
-		System.out.println("인터셉터!!");
-		System.out.println("uriArr.length : " + uriArr.length);
-		
+		}else if(uriArr[1].equals("res")) { //css,js,img같은것들은 그냥 통과시킴
+			return true;
+		} 
 		
 		boolean isLogout = SecurityUtils.isLogout(request);
 		

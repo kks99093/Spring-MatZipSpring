@@ -28,6 +28,29 @@
 		WHERE i_rest = #{i_rest}
 	</insert>
 	
+	<!-- 레스토랑 메뉴 인설트 -->
+	<insert id="insMenus" parameterType="RestRecMenuVO">
+		INSERT INTO t_restaurant_menu
+		(i_rest, seq, menu_pic)
+		SELECT
+		#{i_rest}, IFNULL(MAX(seq), 0)+1, #{menu_pic}
+		FROM t_restaurant_menu
+		WHERE i_rest = #{i_rest}
+	</insert>
+	
+	<!-- 조회수 올리기 -->
+	<update id="updHits">
+		UPDATE t_restaurant
+		SET hits = hits+1
+		WHERE i_rest = #{i_rest};
+	</update>
+	
+	<!-- i_user를 얻어오기위해서 계속 selRest를 부르면 너무 낭비(?)가 심해서 간단하게 i_user만 얻어노느걸로 한개 만듬 -->
+	<select id="selRestChkUser" parameterType="Integer" resultType="Integer">
+		SELECT i_user FROM t_restaurant
+		WHERE i_rest = #{i_rest}
+	</select>
+	
 	<!-- 디테일 셀렉트 -->
 	<select id="selRest" parameterType="restPARAM" resultType="restDMI">
 		SELECT 
@@ -54,17 +77,22 @@
 	<select id="selRestRecMenus" parameterType="RestPARAM" resultType="RestRecMenuVO">
 		SELECT A.seq, A.menu_nm, A.menu_price, A.menu_pic
 		FROM t_restaurant_recommend_menu A
-		<if test="i_user >0">
-			INNER JOIN t_restaurant B
-			ON A.i_rest = B.i_rest
-			AND B.i_user = #{i_user}
-		</if>
-		WHERE i_rest = #{i_rest}
+		WHERE A.i_rest = #{i_rest}
 		<if test="seq > 0">
 			AND A.seq = #{seq}
 		</if>
 		<!-- 리스트를 불러올때는 i_user, seq 둘다 0임, 삭제하기위해 정보를 얻어올때는 저거 두개가 1이상이됨 -->
 		<!-- 만약 내가 쓴글이 아닌데 삭제할 정보를 얻으려고 요청하면 0개의 글이 넘어옴 -->
+	</select>
+	
+	<!-- 메뉴 셀렉트 -->
+	<select id="selRestMenus" parameterType="RestPARAM" resultType="RestRecMenuVO">
+		SELECT A.seq, A.menu_pic
+		FROM t_restaurant_menu A
+		WHERE i_rest = #{i_rest}
+		<if test="seq > 0">
+			AND A.seq = #{seq}
+		</if>
 	</select>
 	
 	
