@@ -55,7 +55,7 @@ public class UserController {
 		if(result == Const.SUCCESS) {
 			System.out.println("로그인 성공");
 			hs.setAttribute(Const.LOGIN_USER, param);
-			return "redirect:/rest/map";
+			return "redirect:/";
 		}
 		String msg = null;
 		if(result == Const.NO_ID) {

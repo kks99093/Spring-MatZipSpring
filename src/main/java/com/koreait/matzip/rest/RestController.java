@@ -22,6 +22,7 @@ import com.koreait.matzip.ViewRef;
 import com.koreait.matzip.model.RestFile;
 import com.koreait.matzip.rest.model.RestDMI;
 import com.koreait.matzip.rest.model.RestPARAM;
+import com.koreait.matzip.rest.model.RestRecMenuVO;
 
 @Controller //Controller박으면 handdlerMapper가 주시하는애라는 뜻
 @RequestMapping("/rest")
@@ -72,14 +73,23 @@ public class RestController {
 		int hitsresult = service.updHits(param);//조회수
 		
 		RestDMI data = service.selRest(param);
-		model.addAttribute("css",new String[] {"restaurant"});
-		model.addAttribute("recMenuList", service.selResMenus(param));
-		model.addAttribute("menuList",service.selMenus(param));
+		model.addAttribute("css",new String[] {"restaurant", "swiper-bundle.min"});		
+											//css 다운받아서씀, import안하고 다운받는이유 : 혹시 저주소가 뻗었을경우 view단이 망가진다 
+		model.addAttribute("recMenuList", service.selRestRecMenus(param));
+
 		model.addAttribute("data", data);
 		model.addAttribute(Const.TITLE,data.getNm());//가게명
 		model.addAttribute(Const.VIEW,"rest/restDetail");
 	return ViewRef.TEMP_MENU;
 	}
+	
+	//Ajax 메뉴
+	@RequestMapping("/ajaxSelMenuList")
+	@ResponseBody
+	public List<RestRecMenuVO> ajaxSelMenuList(RestPARAM param){
+		return service.selMenus(param);
+	}
+	
 	//restaurant 삭제
 	@RequestMapping("/del")
 	public String delRest(Model model, RestPARAM param, HttpSession hs){
@@ -113,7 +123,7 @@ public class RestController {
 		
 		
 		param.setI_user(SecurityUtils.getLoginUserPk(hs)); //로긴 유저 pk 담기
-		return service.delRecMenu(param, hs);
+		return service.delRestRecMenu(param, hs);
 	}
 	
 	//메뉴 등록(multiple 파일 업로드)
@@ -131,5 +141,12 @@ public class RestController {
 		int result = service.insMenus(param, i_user);
 		return"redirect:/rest/detail?i_rest=" + param.getI_rest();
 	}
+	
+	//메뉴 삭제
+	@RequestMapping(value="/ajaxDelMenu")
+	@ResponseBody public int ajaxDelMenu(RestPARAM param) {
+		return service.delRestMenu(param);
+	}
+	
 	
 }

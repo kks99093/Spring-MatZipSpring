@@ -101,7 +101,7 @@
 	<!-- 트렌잭션 여러작업을 하나로 묶는다 (추천메뉴,메뉴,레스토랑 다삭제해야하기때문에 트렌잭션을 검),
 	트랜잭션은 하나하나 지우다가(추천메뉴->메뉴->레스토랑순서로) 실패하면 다시 롤백함-->
 	<!--추천메뉴 삭제-->
-	<delete id="delRestRecMenu" parameterType="restPARAM">
+	<delete id="delRestRecMenu" parameterType="RestPARAM">
 		DELETE A FROM t_restaurant_recommend_menu A
 		INNER JOIN t_restaurant B
 		ON A.i_rest = B.i_rest
@@ -113,19 +113,16 @@
 	</delete>
 	
 	<!-- 메뉴 삭제 -->
-	<delete id="delRestMenu" parameterType="restPARAM">
-		DELETE A FROM t_restaurant_menu A
-		INNER JOIN t_restaurant B
-		ON A.i_rest = B.i_rest
-		WHERE B.i_rest = #{i_rest}
-		AND B.i_user = #{i_user}
+	<delete id="delRestMenu" parameterType="RestPARAM">
+		DELETE FROM t_restaurant_menu 
+		WHERE i_rest = #{i_rest}
 		<if test="seq > 0">
-			AND A.seq = #{seq}
+			AND seq = #{seq}
 		</if>
 	</delete>
 	
 	<!-- 레스토랑 삭제 -->
-	<delete id="delRest" parameterType="restPARAM">
+	<delete id="delRest" parameterType="RestPARAM">
 		DELETE FROM t_restaurant
 		WHERE i_rest = #{i_rest} 
 		AND i_user = #{i_user}

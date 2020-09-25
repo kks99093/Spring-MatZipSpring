@@ -61,7 +61,7 @@ public class RestService {
 		return mapper.selRest(param);
 	}
 	// 추천메뉴 셀렉트
-	public List<RestRecMenuVO> selResMenus(RestPARAM param) {
+	public List<RestRecMenuVO> selRestRecMenus(RestPARAM param) {
 		return mapper.selRestRecMenus(param);
 	}
 	//메뉴 셀렉트
@@ -76,14 +76,6 @@ public class RestService {
 		mapper.delRestMenu(param);
 		mapper.delRest(param);
 		//밑의 메소드를 호출해도됨
-	}
-	//추천메뉴 삭제
-	public int delRestRecMenu(RestPARAM param) {
-		return mapper.delRestRecMenu(param);
-	}
-	//메뉴삭제
-	public int delRestMenu(RestPARAM param) {
-		return mapper.delRestMenu(param);
 	}
 	
 	//추천메뉴 등록(업로드)
@@ -136,19 +128,20 @@ public class RestService {
 			mapper.insRestRegMenu(vo);
 		}
 		return i_rest;
-	}
-	
+	}	
 	
 	//ajax 추천메뉴 삭제
-	public int delRecMenu(RestPARAM param,  HttpSession hs) {
+	public int delRestRecMenu(RestPARAM param,  HttpSession hs) {
 		//실제 파일 삭제
+		//여기서는 파일명을 셀렉트로 받아옴
 		List<RestRecMenuVO> list = mapper.selRestRecMenus(param); //이미지파일 이름을 가져오기위해 추천메뉴를 셀렉해서옴
 		String path = Const.realPath + "/resources/img/rest/" + param.getI_rest() + "/rec_menu/";
 		
 		if(list.size() == 1) {
 			RestRecMenuVO item =list.get(0); //무조건 배열로 넘어오기때문에 이런식으로 객체를 얻어야함
 			
-			if(item.getMenu_pic() != null && !item.getMenu_pic().equals("")) {//이미지가 있다면 삭제
+			if(item.getMenu_pic() != null && !"".equals(item.getMenu_pic())) {//이미지가 있다면 삭제
+				//왠만하면 "".equals를 써야함 null.equals가 되어버리면 null은 객체가 아니기때문에 에러가 터짐(""은 이미 저자체로 객체가 있는것)
 				File file = new File(path + item.getMenu_pic());
 				System.out.println(path + item.getMenu_pic());
 				if(file.exists()) { //파일이 존재하는지(존재한다면 true)
@@ -163,6 +156,21 @@ public class RestService {
 		}
 		
 		return mapper.delRestRecMenu(param);
+	}
+	
+	// ajax 메뉴 삭제
+	public int delRestMenu(RestPARAM param) {	
+		//파일명까지 같이 param에 담아줘서 보냄
+		if(param.getMenu_pic() != null && !"".equals(param.getMenu_pic())){
+			String path = Const.realPath + "/resources/img/rest/" + param.getI_rest() + "/menu/";
+			
+			if(FileUtils.delFile(path + param.getMenu_pic())) {
+				return mapper.delRestMenu(param);
+			}else {
+				return Const.FAIL;
+			}
+		}
+		return mapper.delRestMenu(param);
 	}
 
 	
