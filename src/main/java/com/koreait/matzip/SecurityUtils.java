@@ -15,12 +15,13 @@ import com.koreait.matzip.user.model.UserVO;
 public class SecurityUtils {
 	
 	//세션에서 I_user 불러오는 메소드를 따로 만듬
-	public static int getLoginUserPk(HttpServletRequest request) {
-		return getLoginUser(request).getI_user();
+	public static int getLoginUserPk(HttpServletRequest request) {		
+		return getLoginUserPk(request.getSession());
 	}
 	
 	public static int getLoginUserPk(HttpSession hs) {
-		return ((UserVO)hs.getAttribute(Const.LOGIN_USER)).getI_user();
+		UserVO loginUser = (UserVO)hs.getAttribute(Const.LOGIN_USER);
+		return loginUser == null ? 0 : loginUser.getI_user();
 	}
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ로그인 판단ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 	

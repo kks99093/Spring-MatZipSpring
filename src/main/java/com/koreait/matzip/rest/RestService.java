@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +54,30 @@ public class RestService {
 	}
 	
 	//조회수 올리기
-	public int updHits(RestPARAM param) {		
-		return mapper.updHits(param);
+	public void addHits(RestPARAM param, HttpServletRequest req) {	
+		//마지막으로 detail에 들어갔던 사람의 ip값을 얻어와서 나의 ip와 비교해서 조회수를 올리지 말지 결정
+		int i_user = SecurityUtils.getLoginUserPk(req);
+		
+		String myIp = req.getRemoteAddr(); //현재 들어온 사람의 ip주소를 얻어옴
+		ServletContext ctx = req.getServletContext(); //어플리케이션을 불러옴
+		//request,session,pageContext는 개인용,		어플리케이션은 공용(서버마다 1개밖에 안만들어짐)
+		
+		String currentRestReadIp = (String)ctx.getAttribute(Const.CURRENT_REST_RESAD_IP + param.getI_rest()); 
+		//마지막으로  detail에 들어갔던사람(어플리케이션을 이용해 얻어옴,Const.CURRENT_REST_RESAD_IP + param.getI_rest()라는 키값에 저장되어있음 )
+		//(ex. 5번 글을 읽는다면 Const.CURRENT_REST_RESAD_IP + 5의 키값을 가져옴)
+		
+		//마지막 들어갔던사람이 없거나 (null 내가 첫입장)/ 마지막에 들어갔던사람과 현재들어가는 사람이 다를경우 (ip를 비교)
+		if(currentRestReadIp == null || !currentRestReadIp.equals(myIp)) {
+			//조회수 올림 처리 할거
+			param.setI_user(i_user);
+			//내가 쓴글이면 조회수로 안올라가게 쿼리문으로 막을거
+			
+			mapper.updAddHits(param);
+		
+			//어플리케이션에 마지막에 들어온사람의 ip를  키값에다가 넣어놓음
+			ctx.setAttribute(Const.CURRENT_REST_RESAD_IP + param.getI_rest(), myIp);
+						//currentRestReadIp_같은 경우는 실수할수도 있으니 Const로 빼놓음
+		}
 	}
 	
 	// 디테일 셀렉트

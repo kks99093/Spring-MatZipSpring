@@ -4,12 +4,20 @@
 	<!-- 내가 보고있는 화면범위에서 Restaurant 셀렉트 -->
 	<select id="selRestList" parameterType="restPARAM" resultType="restDMI">
 					<!-- 타입에 class명만 적을거면 mybatis-alias에서 alias등록을 해줘야함 -->
-		SELECT i_rest, nm, lat, lng
-		FROM t_restaurant
+		SELECT A.i_rest, A.nm, A.lat, A.lng
+		<if test="i_user > 0">
+		, CASE WHEN B.i_rest IS NULL THEN 0 ELSE 1 END AS is_favorite
+		</if>
+		FROM t_restaurant A
+		<if test="i_user > 0">
+			LEFT JOIN t_user_favorite B
+			ON A.i_rest = B.i_rest
+			AND B.i_user = #{i_user}
+		</if>
 		WHERE lat BETWEEN #{sw_lat} AND #{ne_lat}
 		AND lng BETWEEN #{sw_lng} AND #{ne_lng}
 	</select>
-	
+
 	<!-- 레스토랑 인설트 -->
 	<insert id="insRest" parameterType="RestPARAM">
 		INSERT INTO t_restaurant
@@ -39,10 +47,11 @@
 	</insert>
 	
 	<!-- 조회수 올리기 -->
-	<update id="updHits">
+	<update id="updAddHits" parameterType="RestPARAM">
 		UPDATE t_restaurant
 		SET hits = hits+1
-		WHERE i_rest = #{i_rest};
+		WHERE i_rest = #{i_rest}
+		AND i_user != #{i_user}
 	</update>
 	
 	<!-- i_user를 얻어오기위해서 계속 selRest를 부르면 너무 낭비(?)가 심해서 간단하게 i_user만 얻어노느걸로 한개 만듬 -->
@@ -55,9 +64,10 @@
 	<select id="selRest" parameterType="restPARAM" resultType="restDMI">
 		SELECT 
 			A.i_rest, A.nm, A.lat, A.lng, A.addr, A.i_user, A.hits
-			, ifnull(B.val,'') as cd_category_nm
-			, C.nm as user_nm
-			, ifnull(D.cnt,0) as cnt_favorite
+			, ifnull(B.val,'') d_category_nm
+			, C.nm asser_nm
+			, ifnull(D.cnt, 0) AS cnt_favorite
+			, CASE WHEN E.i_rest IS NULL THEN 0 ELSE 1 END AS is_favorite
 		FROM t_restaurant A
 		INNER JOIN c_code_d B
 			ON A.cd_category = B.cd
@@ -65,11 +75,14 @@
 		LEFT JOIN t_user C
 			ON A.i_user = C.i_user
 		LEFT JOIN(
-			SELECT i_Rest, COUNT(i_rest) as cnt
+			SELECT i_rest, COUNT(i_rest) as cnt
 			FROM t_user_favorite
 			WHERE i_rest = #{i_rest}
 		) D
 		ON A.i_rest = D.i_rest
+		LEFT JOIN t_user_favorite E
+		ON A.i_rest = E.i_rest
+		AND E.i_user = #{i_user}
 		WHERE A.i_rest = #{i_rest}
 	</select>
 	

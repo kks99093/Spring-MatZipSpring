@@ -76,6 +76,17 @@
 	padding: 5px 0 10px 0;
 }
 
+.restaurant-detail .restaurant_title_wrap{
+	display:flex;
+	align-items: center;
+	
+}
+
+.restaurant-detail #favorite{
+	margin-left: 15px;
+	color: red;
+}
+
 .bg_black {
 	background-color: #000;
 }
@@ -86,7 +97,7 @@
 	z-index: -10;
 	left:0;
 	top:0;
-	position: absolute;
+	position: fixed;
 	width: 100%;
 	height: 100%;
 	background-color: #000A;
@@ -101,19 +112,30 @@
 	height: 80%;
 	position: relative;
 }
-
+.material-icons{
+	cursor:pointer;
+}
 #carouselContainer .material-icons{
+	background-color: gray;
+	color: white;
+	top:40px;
+	right:40px;
 	display: inline-block;
 	position: absolute;
-	top:40px;
-	right: 40px;
-	color: #fff;
-	cursor: pointer;
 	font-size: 3rem;
+}
+
+.swiper-container .imgDel{
+	width: 40px;
+	height: 50px;
+	top:10px;
+	left:50px;
+	position: absolute;
+	z-index: 100;
+	background-color: white;
 }
 .swiper-container{
 	height: 100%;
-	
 }
 
 .swiper-container 

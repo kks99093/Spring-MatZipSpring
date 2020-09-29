@@ -8,7 +8,10 @@ import com.koreait.matzip.user.model.UserVO;
 
 @Mapper // 마이바티스가 import됨, 마이바티스가 Mapper가 있는지 찾는것
 public interface UserMapper {
-	public int insUser(UserVO p);
-	public UserDMI selUser(UserPARAM p);
+	int insUser(UserVO p);
+	UserDMI selUser(UserPARAM p);
+	
+	int insFavorite(UserPARAM param);
+	int delFavorite(UserPARAM param);
 
 }

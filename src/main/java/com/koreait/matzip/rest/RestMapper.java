@@ -28,7 +28,7 @@ public interface RestMapper {
 	int delRest(RestPARAM param);
 	
 	
-	int updHits(RestPARAM param);
+	int updAddHits(RestPARAM param);
 	
 	
 	

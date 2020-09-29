@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.koreait.matzip.Const;
+import com.koreait.matzip.SecurityUtils;
 import com.koreait.matzip.ViewRef;
 import com.koreait.matzip.user.model.UserPARAM;
 import com.koreait.matzip.user.model.UserVO;
@@ -120,5 +121,23 @@ public class UserController {
 		int result = service.login(param);
 		//위의 로그인을 활용해서 아이디 체크를 할거
 		return String.valueOf(result);//정수값 2가 넘어오기때문에 String으로 형변환 해줌
+	}
+	
+	@RequestMapping(value="/ajaxToggleFavorite", method = RequestMethod.GET)
+	@ResponseBody
+	public int ajaxToggleFavorite(UserPARAM param, HttpSession hs) {
+						//Ajax Get받식으로 받을떄 @RequestBody 적으면 안됨
+		int i_user = SecurityUtils.getLoginUserPk(hs);
+		param.setI_user(i_user);
+		return service.ajaxToggleFavorite(param);
+	}
+	
+	@RequestMapping("/favorite")
+	public String favorite(Model model){
+		model.addAttribute(Const.CSS, new String[]{"userFavorite", "common"});
+		model.addAttribute(Const.TITLE, "찜 리스트");
+		model.addAttribute(Const.VIEW, "user/favorite");
+		
+		return ViewRef.TEMP_MENU;
 	}
 }

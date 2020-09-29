@@ -3,6 +3,8 @@ package com.koreait.matzip.rest;
 
 import java.util.List;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +42,11 @@ public class RestController {
 	
 	//화면에 보이는영역에 있는 restaurant 정보 가져오기
 	@RequestMapping(value = "/ajaxGetList", produces = "application/json; charset=utf8")//ResponsBody 인코딩설정을 해줘야함
-	@ResponseBody  public List<RestDMI> ajaxGetList(RestPARAM param) {
+	@ResponseBody  public List<RestDMI> ajaxGetList(RestPARAM param,HttpSession hs) {
 	//이렇게 @ResponseBody 뒤에 바로적어도됨
+		int i_user = SecurityUtils.getLoginUserPk(hs);
+		param.setI_user(i_user);
+		
 		return service.selRestList(param);
 		//그냥 객체를 보내면 스프링이 알아서 JSON형태로 바꿔서 리턴을 해준다
 		//4.대 스프링은 jackson을 기본 라이브러리로 다운받아 주기때문에 라이브러리도 따로 받을필요 없다
@@ -69,11 +74,13 @@ public class RestController {
 	
 	//restaurant 디테일 가기
 	@RequestMapping("/detail")
-	public String detail(Model model,RestPARAM param){
-		int hitsresult = service.updHits(param);//조회수
+	public String detail(Model model,RestPARAM param, HttpServletRequest req){
 		
+		service.addHits(param, req); //조회수
+		int i_user = SecurityUtils.getLoginUserPk(req);
+		param.setI_user(i_user);
 		RestDMI data = service.selRest(param);
-		model.addAttribute("css",new String[] {"restaurant", "swiper-bundle.min"});		
+		model.addAttribute(Const.CSS,new String[] {"restaurant", "swiper-bundle.min"});		
 											//css 다운받아서씀, import안하고 다운받는이유 : 혹시 저주소가 뻗었을경우 view단이 망가진다 
 		model.addAttribute("recMenuList", service.selRestRecMenus(param));
 

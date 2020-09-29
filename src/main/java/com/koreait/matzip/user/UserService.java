@@ -49,5 +49,16 @@ public class UserService {
 		return mapper.insUser(param);
 		//nm이길거나 아이디가 길면 에러가 터지는데 그럴경우 아에 여기로 안넘어오게 자바스크립트에서 길이체크를 해주자
 	}
+	
+	//찜(좋아요) 인설트 딜리트
 
+	public int ajaxToggleFavorite(UserPARAM param) {
+		switch(param.getProc_type()) {
+		case "ins":
+			return mapper.insFavorite(param);
+		case "del":
+			return mapper.delFavorite(param);
+		}
+		return 0;
+	}
 }

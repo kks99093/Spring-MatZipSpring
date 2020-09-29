@@ -50,14 +50,18 @@
 		</c:if>
 		<div class="restaurant-detail">
 			<div id="detail-header">
-				<div class=restaurant_title_wrap">
-					<span class="title">
-						<h1 class="restaurant_name">${data.nm}</h1>						
-					</span>
+				<div class="restaurant_title_wrap">
+					<h1 class="restaurant_name">${data.nm}</h1>		
+					<c:if test="${loginUser != null }">
+						<span id="favorite" class="material-icons" onclick="toggleFavorite()">
+							<c:if test="${data.is_favorite == 0}">star_border</c:if>
+							<c:if test="${data.is_favorite == 1}">star</c:if>
+						</span>
+					</c:if>				
 				</div>
 				<div class="status branch_none">
 					<span class="cnt hit">${data.hits}</span>
-					<span class="cnt favorite">${data.cnt_favorite}</span>
+					<span id="favorite_cnt" class="cnt favorite" style="margin-left: 10px;">${data.cnt_favorite}</span>
 				</div>
 			</div>
 				<table>
@@ -100,6 +104,11 @@
 		    <!-- If we need navigation buttons -->
 		    <div class="swiper-button-prev"></div>
 		    <div class="swiper-button-next"></div>
+		    <c:if test="${loginUser.i_user == data.i_user }">
+			    <div class="imgDel">
+			    	<span class="material-icons" onclick="delMenu()">delete</span>
+			    </div>
+		    </c:if>
 		</div>
 	</div>
 	<div>
@@ -112,6 +121,64 @@
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
 
+	function toggleFavorite(){
+		let parameter = {
+				params:{
+					i_rest : ${data.i_rest}	
+				}
+				
+		}
+		
+		var icon = favorite.innerText.trim()
+		
+		//trim : 양옆의 빈칸을 제거 시킴
+		switch (icon) {
+		case 'star':
+			parameter.params.proc_type = 'del'
+			break;
+		case 'star_border':
+			parameter.params.proc_type = 'ins'
+			break;
+		}
+		
+		axios.get('/user/ajaxToggleFavorite',parameter).then(function(res){
+			if(res.data == 1){
+				favorite.innerText = (icon == 'star' ? 'star_border' : 'star')
+				favorite_cnt.innerText = (icon == 'star' ?${data.cnt_favorite} -1 : ${data.cnt_favorite} + 1)
+			}
+		})
+		
+	}
+
+//메뉴 삭제
+	function delMenu(){
+	//console.log('인덱스 : ' + mySwiper.realIndex) //Swiper의 인덱스를 얻어오는방법 (API 홈페이지에 나와있음)
+
+	if(!confirm('삭제 하시겠습니까?')){return} //확인을 눌럿다면 false가 넘어와서 지나감, 취소를 눌렀다면 return을 만나서 종료
+	
+	const obj = menuList[mySwiper.realIndex] //menuList배열의 mySwiper.realIndex번째 인덱스의 seq값을 얻어옴
+	if(obj != undefined){
+		//서버에 삭제 요청!
+		axios.get('/rest/ajaxDelMenu',{
+			params:{
+				i_rest: ${data.i_rest},
+				seq : obj.seq,
+				menu_pic : obj.menu_pic
+			}
+		}).then(function(res){
+			if(res.data == 1){
+				menuList.splice(mySwiper.realIndex, 1)
+				refreshMenu()	
+			} else {
+				alert('메뉴를 삭제할 수 없습니다')
+			}
+		})
+		
+		
+	}
+}
+//
+
 //스와이퍼
 		//닫기
 	function closeCarousel(){
@@ -120,7 +187,7 @@
 	}
 	
 		//열기
-	function openCarousle(idx){
+	function openCarousel(idx){
 		mySwiper.slideTo(idx)
 		carouselContainer.style.opacity = 1
 		carouselContainer.style.zIndex = 40
@@ -167,8 +234,8 @@
 		
 	}
 	
-	function makeMenuItem(item, idx){
-		//메뉴용 이미지
+	function makeMenuItem(item, idx){	
+		//메뉴용 이미지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ[start]
 		const div = document.createElement('div')
 		div.setAttribute('class', 'menuItem') //css를위해 클래스명을 넣어놓음
 		
@@ -177,11 +244,14 @@
 		img.setAttribute('src', `/res/img/rest/${data.i_rest}/menu/\${item.menu_pic}`)
 		img.style.cursor = 'pointer'
 		img.addEventListener('click', function(){
-			openCarousle(idx+1)
+			openCarousel(idx+1)
 		})
 		div.append(img)
 		
-		//스와이프용 이미지
+		//ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ[end]
+			
+		conMenuList.append(div)
+		//스와이프용 이미지 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ[start]
 		const swiperDiv = document.createElement('div')
 		swiperDiv.setAttribute('class', 'swiper-slide')
 		
@@ -191,44 +261,8 @@
 		
 		swiperDiv.append(swiperImg)
 		mySwiper.appendSlide(swiperDiv);
-		
-		
-		
-		if(${loginUser.i_user == data.i_user}){ //여기 jstl 쓸수있음
-			const delDiv = document.createElement('div')
-			delDiv.setAttribute('class','delIconContainer')
-			delDiv.addEventListener('click', function(){
-				if(idx > -1){
-					//서버에 삭제 요청!
-					axios.get('/rest/ajaxDelMenu',{
-						params:{
-							i_rest: ${data.i_rest},
-							seq : item.seq,
-							menu_pic : item.menu_pic
-						}
-					}).then(function(res){
-						if(res.data == 1){
-							menuList.splice(idx, 1)
-							refreshMenu()	
-						} else {
-							alert('메뉴를 삭제할 수 없습니다')
-						}
-					})
-					
-					
-				}
-			})
-			
-			const span = document.createElement('span')
-			span.setAttribute('class', 'material-icons')
-			span.innerText = 'clear'
-			
-			delDiv.append(span)
-			div.append(delDiv)
-		}
-			
-		conMenuList.append(div)
-		swiperWrapper.append(swiperDiv)
+		//ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ[end]
+	
 	}
 	
 	ajaxSelMenuList()
