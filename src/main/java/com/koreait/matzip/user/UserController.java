@@ -133,7 +133,14 @@ public class UserController {
 	}
 	
 	@RequestMapping("/favorite")
-	public String favorite(Model model){
+	public String favorite(Model model,HttpSession hs){
+		int i_user = SecurityUtils.getLoginUserPk(hs);
+		
+		UserPARAM param = new UserPARAM();
+		param.setI_user(i_user);
+		
+		model.addAttribute("data", service.selFavoriteList(param)); //로그인한 사람의 찜리스트
+		
 		model.addAttribute(Const.CSS, new String[]{"userFavorite", "common"});
 		model.addAttribute(Const.TITLE, "찜 리스트");
 		model.addAttribute(Const.VIEW, "user/favorite");

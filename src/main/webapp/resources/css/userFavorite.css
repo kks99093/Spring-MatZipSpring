@@ -18,7 +18,8 @@
 
 .f-item .img{
 	width: 300px;
-	background-color: black;
+	border: 1px solid black;
+	overflow-y:hidden; 
 }
 
 .f-item .img img{
@@ -41,9 +42,28 @@
 
 .f-item .ctnt .bottom{
 	flex-grow:1;
-	background: navy;
+	overflow-x: hidden;
+	display: flex;
 }
 
+.f-item .ctnt .bottom .recMenuItem{
+	width: 110px;
+}
+
+.f-item .ctnt .bottom .recMenuItem{
+	margin-left: 3px;
+}
+
+.f-item .ctnt .bottom .recMenuItem .info{
+	text-align: center;
+}
+.f-item .ctnt .bottom .recMenuItem .pic{
+	width: 100%;
+}
+
+.f-item .ctnt .bottom .recMenuItem img{
+	width: 100%;
+}
 .f-item .ctnt .top .f-title{
 	flex-grow: 1;
 }

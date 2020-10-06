@@ -119,6 +119,7 @@ public class RestService {
 		String path = Const.realPath + "/resources/img/rest/" + i_rest + "/rec_menu/";
 		//저장위치 얻어오기(드라이브~프로젝트작업공간까지의 절대주소), pome.xml에서 서블릿,jsp를 최신버전으로 바꿔줘야함
 		System.out.println(path);
+		FileUtils.makeFolder(path);
 		List<RestRecMenuVO> list = new ArrayList();
 		
 		for(int i=0; i<menuNmArr.length; i++) {
@@ -206,7 +207,7 @@ public class RestService {
 		}
 		
 		String path = Const.realPath + "/resources/img/rest/" + param.getI_rest() + "/menu/";
-		
+		FileUtils.makeFolder(path);
 		List<RestRecMenuVO> list = new ArrayList();
 		
 		for(MultipartFile mf : param.getMenu_pic()) {
